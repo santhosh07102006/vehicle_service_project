@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Bill #{{ bill.bill_id }} – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>BILL <span>#{{ bill.bill_id }}</span></h1>
+  <div style="display:flex;gap:0.75rem">
+    <button onclick="window.print()" class="btn btn-outline">🖨 Print</button>
+    <a href="/bills" class="btn btn-outline">← Back</a>
+  </div>
+</div>
+
+<div class="card" id="printArea">
+  <!-- Header -->
+  <div class="bill-header">
+    <div class="bill-company">
+      <h2>VSERVICE PRO</h2>
+      <p style="color:var(--muted);font-size:0.85rem">Vehicle Service Center</p>
+    </div>
+    <div class="bill-meta">
+      <div class="bill-id">#{{ "%04d" % bill.bill_id }}</div>
+      <p style="color:var(--muted);font-size:0.85rem">Date: {{ bill.bill_date }}</p>
+      <span class="badge {{ 'badge-success' if bill.payment_status=='Paid' else 'badge-warning' }}" style="margin-top:0.25rem">
+        {{ bill.payment_status }}
+      </span>
+    </div>
+  </div>
+
+  <hr style="border-color:var(--border);margin-bottom:1.5rem">
+
+  <!-- Customer & Vehicle Info -->
+  <div class="bill-info-grid">
+    <div class="bill-info-block">
+      <h4>Customer</h4>
+      <p><strong>{{ bill.name }}</strong><br>
+      📞 {{ bill.phone }}<br>
+      {% if bill.address %}📍 {{ bill.address }}{% endif %}
+      </p>
+    </div>
+    <div class="bill-info-block">
+      <h4>Vehicle</h4>
+      <p>
+        <strong style="color:var(--accent)">{{ bill.reg_number }}</strong><br>
+        {{ bill.make }} {{ bill.model }}<br>
+        <span class="badge badge-info">{{ bill.vehicle_type }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Services -->
+  {% if svc_items %}
+  <div class="section-title">Services</div>
+  <div class="table-wrap" style="margin-bottom:1.5rem">
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        {% for item in svc_items %}
+        <tr>
+          <td>{{ item.label }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ "{:,.2f}".format(item.unit_price) }}</td>
+          <td>₹{{ "{:,.2f}".format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Parts -->
+  {% if part_items %}
+  <div class="section-title">Parts Used</div>
+  <div class="table-wrap" style="margin-bottom:1.5rem">
+    <table>
+      <thead>
+        <tr><th>Part</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        {% for item in part_items %}
+        <tr>
+          <td>{{ item.label }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ "{:,.2f}".format(item.unit_price) }}</td>
+          <td>₹{{ "{:,.2f}".format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Total -->
+  <div class="total-box">
+    <span class="total-label">Payment Method: <strong>{{ bill.payment_method }}</strong></span>
+    <span class="total-label">Grand Total</span>
+    <span class="total-value">₹{{ "{:,.2f}".format(bill.total_amount) }}</span>
+  </div>
+
+  {% if bill.notes %}
+  <p style="margin-top:1rem;color:var(--muted);font-size:0.88rem">📝 <em>{{ bill.notes }}</em></p>
+  {% endif %}
+</div>
+
+<style>
+@media print {
+  nav, .page-header, .flash-messages { display:none !important; }
+  body { background:#fff; color:#000; }
+  .card { border:1px solid #ddd; }
+  .total-value { color:#f97316 !important; }
+}
+</style>
+
+{% endblock %}

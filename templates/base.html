@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}VService Pro{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f12;
+    --surface:   #151820;
+    --card:      #1c2030;
+    --border:    #2a2f3f;
+    --accent:    #f97316;
+    --accent2:   #fb923c;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --success:   #22c55e;
+    --danger:    #ef4444;
+    --info:      #3b82f6;
+    --warning:   #eab308;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; min-height:100vh; }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    position: sticky; top:0; z-index:100;
+  }
+  .nav-brand {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.6rem; font-weight:800;
+    color:var(--accent); letter-spacing:2px;
+    text-decoration:none; margin-right:2.5rem;
+  }
+  .nav-brand span { color:var(--text); }
+  .nav-links { display:flex; gap:0.25rem; flex:1; }
+  .nav-links a {
+    color:var(--muted); text-decoration:none;
+    font-size:0.85rem; font-weight:600; letter-spacing:1px;
+    text-transform:uppercase;
+    padding: 0.5rem 1rem;
+    border-radius:4px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color:var(--accent); background:rgba(249,115,22,0.1);
+  }
+
+  /* MAIN */
+  main { max-width:1300px; margin:0 auto; padding:2rem; }
+
+  /* FLASH */
+  .flash-messages { margin-bottom:1.5rem; }
+  .flash {
+    padding:0.85rem 1.25rem; border-radius:6px;
+    font-size:0.9rem; font-weight:500; margin-bottom:0.5rem;
+    border-left:4px solid;
+  }
+  .flash.success { background:rgba(34,197,94,0.1); border-color:var(--success); color:#86efac; }
+  .flash.info    { background:rgba(59,130,246,0.1); border-color:var(--info);    color:#93c5fd; }
+  .flash.danger  { background:rgba(239,68,68,0.1);  border-color:var(--danger);  color:#fca5a5; }
+  .flash.warning { background:rgba(234,179,8,0.1);  border-color:var(--warning); color:#fde047; }
+
+  /* PAGE HEADER */
+  .page-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:2rem; padding-bottom:1rem;
+    border-bottom:1px solid var(--border);
+  }
+  .page-header h1 {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:2rem; font-weight:800; letter-spacing:1px;
+    color:var(--text);
+  }
+  .page-header h1 span { color:var(--accent); }
+
+  /* BUTTONS */
+  .btn {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.55rem 1.2rem; border-radius:5px;
+    font-size:0.85rem; font-weight:600; letter-spacing:0.5px;
+    text-decoration:none; border:none; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:hover { background:var(--accent2); }
+  .btn-outline { background:transparent; color:var(--accent); border:1.5px solid var(--accent); }
+  .btn-outline:hover { background:var(--accent); color:#fff; }
+  .btn-danger  { background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); }
+  .btn-danger:hover { background:var(--danger); color:#fff; }
+  .btn-sm { padding:0.35rem 0.75rem; font-size:0.78rem; }
+  .btn-success { background:rgba(34,197,94,0.15); color:#86efac; border:1px solid rgba(34,197,94,0.3); }
+  .btn-success:hover { background:var(--success); color:#fff; }
+
+  /* CARDS */
+  .card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:1.5rem;
+  }
+
+  /* STAT CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; margin-bottom:2.5rem; }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--accent-color, var(--accent));
+  }
+  .stat-card .stat-label { font-size:0.75rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; }
+  .stat-card .stat-value { font-family:'Barlow Condensed',sans-serif; font-size:2.4rem; font-weight:800; color:var(--text); line-height:1; }
+  .stat-card .stat-icon { position:absolute; right:1.25rem; top:50%; transform:translateY(-50%); font-size:2.5rem; opacity:0.12; }
+
+  /* TABLE */
+  .table-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; background:var(--card); }
+  thead th {
+    background:var(--surface); padding:0.9rem 1rem;
+    font-size:0.72rem; font-weight:700; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--muted);
+    text-align:left; border-bottom:1px solid var(--border);
+  }
+  tbody td { padding:0.9rem 1rem; border-bottom:1px solid var(--border); font-size:0.9rem; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover { background:rgba(255,255,255,0.02); }
+
+  /* BADGE */
+  .badge {
+    display:inline-block; padding:0.25rem 0.65rem;
+    border-radius:20px; font-size:0.72rem; font-weight:700; letter-spacing:0.5px;
+  }
+  .badge-success { background:rgba(34,197,94,0.15);  color:#86efac; }
+  .badge-warning { background:rgba(234,179,8,0.15);   color:#fde047; }
+  .badge-info    { background:rgba(59,130,246,0.15);  color:#93c5fd; }
+  .badge-danger  { background:rgba(239,68,68,0.15);   color:#fca5a5; }
+  .badge-muted   { background:rgba(100,116,139,0.15); color:var(--muted); }
+
+  /* FORM */
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; }
+  .form-group { display:flex; flex-direction:column; gap:0.4rem; }
+  .form-group label { font-size:0.78rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); padding:0.65rem 0.9rem;
+    border-radius:5px; font-size:0.9rem; font-family:'Barlow',sans-serif;
+    transition:border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(249,115,22,0.1);
+  }
+  .form-group textarea { resize:vertical; min-height:80px; }
+
+  .form-actions { margin-top:1.75rem; display:flex; gap:0.75rem; }
+
+  .section-title {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:1.1rem; font-weight:700; letter-spacing:1px;
+    color:var(--accent); text-transform:uppercase;
+    margin:1.75rem 0 1rem;
+    padding-bottom:0.5rem; border-bottom:1px solid var(--border);
+  }
+
+  /* DYNAMIC ROWS */
+  .line-item-row {
+    display:grid; gap:0.75rem; align-items:end;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:6px; padding:1rem; margin-bottom:0.75rem;
+  }
+  .line-item-row.svc-row { grid-template-columns: 2fr 1.5fr 0.6fr 1fr auto; }
+  .line-item-row.prt-row { grid-template-columns: 2fr 1.5fr 0.6fr 1fr auto; }
+
+  .remove-row-btn {
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2);
+    color:#fca5a5; border-radius:5px; padding:0.5rem 0.65rem;
+    cursor:pointer; font-size:1rem; transition:all 0.2s;
+    height:38px;
+  }
+  .remove-row-btn:hover { background:var(--danger); color:#fff; }
+
+  .total-box {
+    background:var(--surface); border:1px solid var(--accent);
+    border-radius:8px; padding:1.25rem 1.5rem;
+    display:flex; justify-content:flex-end; align-items:center; gap:1rem;
+    margin-top:1rem;
+  }
+  .total-box .total-label { font-size:0.85rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
+  .total-box .total-value { font-family:'Barlow Condensed',sans-serif; font-size:2rem; font-weight:800; color:var(--accent); }
+
+  /* BILL PRINT */
+  .bill-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; }
+  .bill-company { font-family:'Barlow Condensed',sans-serif; }
+  .bill-company h2 { font-size:2rem; font-weight:800; color:var(--accent); letter-spacing:2px; }
+  .bill-meta { text-align:right; }
+  .bill-meta .bill-id { font-family:'Barlow Condensed',sans-serif; font-size:2.5rem; font-weight:800; color:var(--muted); }
+  .bill-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+  .bill-info-block h4 { font-size:0.72rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; }
+  .bill-info-block p { font-size:0.95rem; line-height:1.6; }
+
+  @media(max-width:768px) {
+    nav { padding:0 1rem; }
+    main { padding:1rem; }
+    .line-item-row.svc-row,
+    .line-item-row.prt-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">V<span>SERVICE</span></a>
+  <div class="nav-links">
+    <a href="/"          class="{{ 'active' if request.endpoint=='index' }}">Dashboard</a>
+    <a href="/customers" class="{{ 'active' if 'customer' in request.endpoint }}">Customers</a>
+    <a href="/vehicles"  class="{{ 'active' if 'vehicle'  in request.endpoint }}">Vehicles</a>
+    <a href="/parts"     class="{{ 'active' if 'part'     in request.endpoint }}">Inventory</a>
+    <a href="/bills"     class="{{ 'active' if 'bill'     in request.endpoint }}">Billing</a>
+  </div>
+</nav>
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for cat, msg in messages %}
+          <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

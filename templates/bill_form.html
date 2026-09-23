@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}New Bill – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>NEW <span>BILL</span></h1>
+  <a href="/bills" class="btn btn-outline">← Back</a>
+</div>
+
+<form method="POST" id="billForm">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+  <!-- Left: Customer & Vehicle -->
+  <div class="card">
+    <div class="section-title" style="margin-top:0">Customer & Vehicle</div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Customer *</label>
+      <select name="customer_id" id="customerSelect" required onchange="loadVehicles()">
+        <option value="">— Select Customer —</option>
+        {% for c in customers %}
+        <option value="{{ c.customer_id }}">{{ c.name }} ({{ c.phone }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Vehicle *</label>
+      <select name="vehicle_id" id="vehicleSelect" required>
+        <option value="">— Select Customer First —</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Bill Date</label>
+      <input type="date" name="bill_date" value="{{ today }}" id="billDate">
+    </div>
+  </div>
+
+  <!-- Right: Payment -->
+  <div class="card">
+    <div class="section-title" style="margin-top:0">Payment Details</div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Payment Status</label>
+      <select name="payment_status">
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Payment Method</label>
+      <select name="payment_method">
+        <option value="Cash">Cash</option>
+        <option value="Card">Card</option>
+        <option value="UPI">UPI</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea name="notes" placeholder="Any remarks..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Services -->
+<div class="card" style="margin-top:1.5rem">
+  <div class="section-title" style="margin-top:0">Services Performed</div>
+  <div id="svcRows"></div>
+  <button type="button" class="btn btn-outline btn-sm" onclick="addSvcRow()">+ Add Service</button>
+</div>
+
+<!-- Parts -->
+<div class="card" style="margin-top:1.5rem">
+  <div class="section-title" style="margin-top:0">Parts Used</div>
+  <div id="prtRows"></div>
+  <button type="button" class="btn btn-outline btn-sm" onclick="addPrtRow()">+ Add Part</button>
+</div>
+
+<!-- Total -->
+<div class="total-box" style="margin-top:1.5rem">
+  <span class="total-label">Grand Total</span>
+  <span class="total-value" id="grandTotal">₹0.00</span>
+</div>
+
+<div class="form-actions" style="margin-top:1rem">
+  <button type="submit" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem">Generate Bill</button>
+  <a href="/bills" class="btn btn-outline">Cancel</a>
+</div>
+</form>
+
+<script>
+const SERVICES = {{ services | tojson }};
+const PARTS    = {{ parts    | tojson }};
+
+// Set today's date
+document.getElementById('billDate').value = new Date().toISOString().split('T')[0];
+
+async function loadVehicles() {
+  const cid = document.getElementById('customerSelect').value;
+  const sel = document.getElementById('vehicleSelect');
+  sel.innerHTML = '<option value="">Loading...</option>';
+  if (!cid) { sel.innerHTML = '<option value="">— Select Customer First —</option>'; return; }
+  const res = await fetch(`/api/vehicles/${cid}`);
+  const vehicles = await res.json();
+  sel.innerHTML = '<option value="">— Select Vehicle —</option>';
+  vehicles.forEach(v => {
+    sel.innerHTML += `<option value="${v.vehicle_id}">${v.reg_number} – ${v.make} ${v.model}</option>`;
+  });
+}
+
+function buildServiceOptions(selectedId) {
+  let opts = '<option value="">— Custom —</option>';
+  SERVICES.forEach(s => {
+    opts += `<option value="${s.service_id}" data-price="${s.base_price}" ${s.service_id==selectedId?'selected':''}>${s.service_name} (₹${s.base_price})</option>`;
+  });
+  return opts;
+}
+
+function buildPartOptions(selectedId) {
+  let opts = '<option value="">— Custom —</option>';
+  PARTS.forEach(p => {
+    opts += `<option value="${p.part_id}" data-price="${p.unit_price}" ${p.part_id==selectedId?'selected':''}>${p.part_name} (₹${p.unit_price})</option>`;
+  });
+  return opts;
+}
+
+function addSvcRow() {
+  const div = document.createElement('div');
+  div.className = 'line-item-row svc-row';
+  div.innerHTML = `
+    <div class="form-group">
+      <label>Service</label>
+      <select name="svc_id[]" onchange="onSvcChange(this)">
+        ${buildServiceOptions(null)}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Custom Name</label>
+      <input type="text" name="svc_custom_name[]" placeholder="If not from list">
+    </div>
+    <div class="form-group">
+      <label>Qty</label>
+      <input type="number" name="svc_qty[]" value="1" min="1" oninput="calcTotal()">
+    </div>
+    <div class="form-group">
+      <label>Price (₹)</label>
+      <input type="number" name="svc_price[]" step="0.01" min="0" placeholder="0.00" oninput="calcTotal()">
+    </div>
+    <button type="button" class="remove-row-btn" onclick="this.parentElement.remove();calcTotal()">✕</button>
+  `;
+  document.getElementById('svcRows').appendChild(div);
+}
+
+function onSvcChange(sel) {
+  const opt = sel.selectedOptions[0];
+  const price = opt.dataset.price;
+  const row = sel.closest('.line-item-row');
+  if (price) row.querySelector('[name="svc_price[]"]').value = price;
+  calcTotal();
+}
+
+function addPrtRow() {
+  const div = document.createElement('div');
+  div.className = 'line-item-row prt-row';
+  div.innerHTML = `
+    <div class="form-group">
+      <label>Part</label>
+      <select name="prt_id[]" onchange="onPrtChange(this)">
+        ${buildPartOptions(null)}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Custom Name</label>
+      <input type="text" name="prt_custom_name[]" placeholder="If not from list">
+    </div>
+    <div class="form-group">
+      <label>Qty</label>
+      <input type="number" name="prt_qty[]" value="1" min="1" oninput="calcTotal()">
+    </div>
+    <div class="form-group">
+      <label>Price (₹)</label>
+      <input type="number" name="prt_price[]" step="0.01" min="0" placeholder="0.00" oninput="calcTotal()">
+    </div>
+    <button type="button" class="remove-row-btn" onclick="this.parentElement.remove();calcTotal()">✕</button>
+  `;
+  document.getElementById('prtRows').appendChild(div);
+}
+
+function onPrtChange(sel) {
+  const opt = sel.selectedOptions[0];
+  const price = opt.dataset.price;
+  const row = sel.closest('.line-item-row');
+  if (price) row.querySelector('[name="prt_price[]"]').value = price;
+  calcTotal();
+}
+
+function calcTotal() {
+  let total = 0;
+  document.querySelectorAll('[name="svc_price[]"]').forEach((el, i) => {
+    const qty = parseFloat(document.querySelectorAll('[name="svc_qty[]"]')[i]?.value) || 1;
+    total += (parseFloat(el.value) || 0) * qty;
+  });
+  document.querySelectorAll('[name="prt_price[]"]').forEach((el, i) => {
+    const qty = parseFloat(document.querySelectorAll('[name="prt_qty[]"]')[i]?.value) || 1;
+    total += (parseFloat(el.value) || 0) * qty;
+  });
+  document.getElementById('grandTotal').textContent = '₹' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// Add one row each by default
+addSvcRow();
+addPrtRow();
+</script>
+
+{% endblock %}

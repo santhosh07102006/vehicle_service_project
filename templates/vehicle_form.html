@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if vehicle else 'Register' }} Vehicle – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>{{ 'EDIT' if vehicle else 'REGISTER' }} <span>VEHICLE</span></h1>
+  <a href="/vehicles" class="btn btn-outline">← Back</a>
+</div>
+
+<div class="card" style="max-width:800px">
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Owner (Customer) *</label>
+        <select name="customer_id" required>
+          <option value="">— Select Customer —</option>
+          {% for c in customers %}
+          <option value="{{ c.customer_id }}" {{ 'selected' if vehicle and vehicle.customer_id==c.customer_id }}>
+            {{ c.name }} ({{ c.phone }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Registration Number *</label>
+        <input type="text" name="reg_number" value="{{ vehicle.reg_number if vehicle else '' }}"
+               required placeholder="e.g. TN01AB1234" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Make (Brand) *</label>
+        <input type="text" name="make" value="{{ vehicle.make if vehicle else '' }}" required placeholder="e.g. Maruti, Honda">
+      </div>
+      <div class="form-group">
+        <label>Model *</label>
+        <input type="text" name="model" value="{{ vehicle.model if vehicle else '' }}" required placeholder="e.g. Swift, City">
+      </div>
+      <div class="form-group">
+        <label>Year of Manufacture</label>
+        <input type="number" name="year" value="{{ vehicle.year if vehicle else '' }}" placeholder="e.g. 2020" min="1990" max="2030">
+      </div>
+      <div class="form-group">
+        <label>Vehicle Type *</label>
+        <select name="vehicle_type">
+          {% for t in ['Car','Bike','Truck','Van','Other'] %}
+          <option value="{{ t }}" {{ 'selected' if vehicle and vehicle.vehicle_type==t }}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <input type="text" name="color" value="{{ vehicle.color if vehicle else '' }}" placeholder="e.g. White">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ 'Update Vehicle' if vehicle else 'Register Vehicle' }}</button>
+      <a href="/vehicles" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Customers – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>CUSTO<span>MERS</span></h1>
+  <a href="/customers/add" class="btn btn-primary">+ Add Customer</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Address</th><th>Registered</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for c in customers %}
+      <tr>
+        <td>{{ c.customer_id }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.phone }}</td>
+        <td>{{ c.email or '–' }}</td>
+        <td>{{ c.address or '–' }}</td>
+        <td>{{ c.created_at.strftime('%d %b %Y') }}</td>
+        <td style="display:flex;gap:0.5rem">
+          <a href="/customers/edit/{{ c.customer_id }}" class="btn btn-outline btn-sm">Edit</a>
+          <a href="/customers/delete/{{ c.customer_id }}" class="btn btn-danger btn-sm"
+             onclick="return confirm('Delete this customer?')">Del</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No customers found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

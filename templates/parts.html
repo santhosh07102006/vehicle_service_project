@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Parts Inventory – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>PARTS <span>INVENTORY</span></h1>
+  <a href="/parts/add" class="btn btn-primary">+ Add Part</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Code</th><th>Part Name</th><th>Category</th><th>Stock</th><th>Unit Price</th><th>Supplier</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for p in parts %}
+      <tr>
+        <td><code style="color:var(--muted);font-size:0.8rem">{{ p.part_code or '–' }}</code></td>
+        <td>{{ p.part_name }}</td>
+        <td>{{ p.category or '–' }}</td>
+        <td>
+          <span class="badge {{ 'badge-success' if p.quantity > 10 else ('badge-warning' if p.quantity > 0 else 'badge-danger') }}">
+            {{ p.quantity }} units
+          </span>
+        </td>
+        <td>₹{{ "{:,.2f}".format(p.unit_price) }}</td>
+        <td>{{ p.supplier or '–' }}</td>
+        <td style="display:flex;gap:0.5rem">
+          <a href="/parts/edit/{{ p.part_id }}" class="btn btn-outline btn-sm">Edit</a>
+          <a href="/parts/delete/{{ p.part_id }}" class="btn btn-danger btn-sm"
+             onclick="return confirm('Delete this part?')">Del</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No parts in inventory.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

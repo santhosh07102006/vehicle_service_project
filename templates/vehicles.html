@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Vehicles – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>VEHI<span>CLES</span></h1>
+  <a href="/vehicles/add" class="btn btn-primary">+ Register Vehicle</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Reg No.</th><th>Owner</th><th>Phone</th><th>Make / Model</th><th>Year</th><th>Type</th><th>Color</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for v in vehicles %}
+      <tr>
+        <td><strong style="color:var(--accent)">{{ v.reg_number }}</strong></td>
+        <td>{{ v.customer_name }}</td>
+        <td>{{ v.phone }}</td>
+        <td>{{ v.make }} {{ v.model }}</td>
+        <td>{{ v.year or '–' }}</td>
+        <td><span class="badge badge-info">{{ v.vehicle_type }}</span></td>
+        <td>{{ v.color or '–' }}</td>
+        <td style="display:flex;gap:0.5rem">
+          <a href="/vehicles/edit/{{ v.vehicle_id }}" class="btn btn-outline btn-sm">Edit</a>
+          <a href="/vehicles/delete/{{ v.vehicle_id }}" class="btn btn-danger btn-sm"
+             onclick="return confirm('Delete this vehicle?')">Del</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No vehicles registered.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

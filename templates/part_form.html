@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if part else 'Add' }} Part – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>{{ 'EDIT' if part else 'ADD' }} <span>PART</span></h1>
+  <a href="/parts" class="btn btn-outline">← Back</a>
+</div>
+
+<div class="card" style="max-width:700px">
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Part Name *</label>
+        <input type="text" name="part_name" value="{{ part.part_name if part else '' }}" required placeholder="e.g. Engine Oil (1L)">
+      </div>
+      <div class="form-group">
+        <label>Part Code</label>
+        <input type="text" name="part_code" value="{{ part.part_code if part else '' }}" placeholder="e.g. OIL-001">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" name="category" value="{{ part.category if part else '' }}" placeholder="e.g. Lubricants, Filters">
+      </div>
+      <div class="form-group">
+        <label>Quantity in Stock *</label>
+        <input type="number" name="quantity" value="{{ part.quantity if part else 0 }}" required min="0">
+      </div>
+      <div class="form-group">
+        <label>Unit Price (₹) *</label>
+        <input type="number" name="unit_price" value="{{ part.unit_price if part else '' }}" required step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label>Supplier</label>
+        <input type="text" name="supplier" value="{{ part.supplier if part else '' }}" placeholder="Supplier name">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ 'Update Part' if part else 'Add Part' }}</button>
+      <a href="/parts" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

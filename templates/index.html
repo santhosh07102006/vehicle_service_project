@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>DASH<span>BOARD</span></h1>
+  <a href="/bills/add" class="btn btn-primary">+ New Bill</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card" style="--accent-color:#f97316">
+    <div class="stat-label">Total Customers</div>
+    <div class="stat-value">{{ total_customers }}</div>
+    <div class="stat-icon">👤</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#3b82f6">
+    <div class="stat-label">Registered Vehicles</div>
+    <div class="stat-value">{{ total_vehicles }}</div>
+    <div class="stat-icon">🚗</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#22c55e">
+    <div class="stat-label">Total Bills</div>
+    <div class="stat-value">{{ total_bills }}</div>
+    <div class="stat-icon">🧾</div>
+  </div>
+  <div class="stat-card" style="--accent-color:#eab308">
+    <div class="stat-label">Revenue Collected</div>
+    <div class="stat-value" style="font-size:1.8rem">₹{{ "{:,.0f}".format(revenue) }}</div>
+    <div class="stat-icon">💰</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title" style="margin-top:0">Recent Bills</div>
+  {% if recent_bills %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Bill #</th><th>Customer</th><th>Vehicle</th>
+          <th>Date</th><th>Amount</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in recent_bills %}
+        <tr>
+          <td>#{{ b.bill_id }}</td>
+          <td>{{ b.name }}</td>
+          <td>{{ b.reg_number }}</td>
+          <td>{{ b.bill_date }}</td>
+          <td>₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+          <td>
+            <span class="badge {{ 'badge-success' if b.payment_status=='Paid' else 'badge-warning' }}">
+              {{ b.payment_status }}
+            </span>
+          </td>
+          <td><a href="/bills/view/{{ b.bill_id }}" class="btn btn-outline btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);text-align:center;padding:2rem">No bills yet. <a href="/bills/add" style="color:var(--accent)">Create one →</a></p>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Bills – VService Pro{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>BIL<span>LING</span></h1>
+  <a href="/bills/add" class="btn btn-primary">+ New Bill</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Bill #</th><th>Customer</th><th>Vehicle</th><th>Date</th><th>Amount</th><th>Payment</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for b in bills %}
+      <tr>
+        <td><strong style="color:var(--accent)">#{{ b.bill_id }}</strong></td>
+        <td>{{ b.name }}</td>
+        <td>{{ b.reg_number }} <small style="color:var(--muted)">{{ b.make }} {{ b.model }}</small></td>
+        <td>{{ b.bill_date }}</td>
+        <td>₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+        <td><span class="badge badge-muted">{{ b.payment_method }}</span></td>
+        <td>
+          <span class="badge {{ 'badge-success' if b.payment_status=='Paid' else 'badge-warning' }}">
+            {{ b.payment_status }}
+          </span>
+        </td>
+        <td style="display:flex;gap:0.5rem">
+          <a href="/bills/view/{{ b.bill_id }}" class="btn btn-outline btn-sm">View</a>
+          <a href="/bills/delete/{{ b.bill_id }}" class="btn btn-danger btn-sm"
+             onclick="return confirm('Delete this bill?')">Del</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No bills found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
